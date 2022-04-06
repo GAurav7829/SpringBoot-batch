@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import com.grv.batch.tasklet.Step3Tasklet;
 import com.grv.listeners.StepListener;
 import com.grv.model.User;
 
@@ -109,5 +110,21 @@ public class SpringBatchConfig {
 		return defaultLineMapper;
 	}
 	
+	@Autowired
+	private Step3Tasklet step3Tasklet;
+	
+	@Bean
+	public Job job1(JobBuilderFactory jobBuilderFactory, Step step3) {
+		Job job = jobBuilderFactory.get("Job1")
+				.incrementer(new RunIdIncrementer())
+				.start(step3).build();
+		return job;
+	}
+	
+	@Bean
+	public Step step3(StepBuilderFactory stepBuilderFactory) {
+		TaskletStep step = stepBuilderFactory.get("step-taskletStep").tasklet(step3Tasklet).listener(stepListener).build();
+		return step;
+	}
 
 }
