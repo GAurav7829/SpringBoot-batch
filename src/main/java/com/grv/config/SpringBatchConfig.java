@@ -122,7 +122,7 @@ public class SpringBatchConfig {
 	
 	@Bean
 	public Job job1(JobBuilderFactory jobBuilderFactory, Step step3, Step step4) {
-		Job job = jobBuilderFactory.get("Job1")
+		Job job = jobBuilderFactory.get("write-excel-file")
 				.incrementer(new RunIdIncrementer())
 				.start(step3).on("FAILED").end()
 				.next(step4).on("FAILED").end().build()
