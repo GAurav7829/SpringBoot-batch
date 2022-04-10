@@ -1,5 +1,8 @@
 package com.grv.config;
 
+import java.io.IOException;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -22,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 import com.grv.batch.tasklet.Step3Tasklet;
+import com.grv.batch.tasklet.Step4Tasklet;
 import com.grv.listeners.StepListener;
 import com.grv.model.User;
 
@@ -113,17 +117,28 @@ public class SpringBatchConfig {
 	@Autowired
 	private Step3Tasklet step3Tasklet;
 	
+	@Autowired
+	private Step4Tasklet step4Tasklet;
+	
 	@Bean
-	public Job job1(JobBuilderFactory jobBuilderFactory, Step step3) {
+	public Job job1(JobBuilderFactory jobBuilderFactory, Step step3, Step step4) {
 		Job job = jobBuilderFactory.get("Job1")
 				.incrementer(new RunIdIncrementer())
-				.start(step3).build();
+				.start(step3).on("FAILED").end()
+				.next(step4).on("FAILED").end().build()
+				.build();
 		return job;
 	}
 	
 	@Bean
 	public Step step3(StepBuilderFactory stepBuilderFactory) {
-		TaskletStep step = stepBuilderFactory.get("step-taskletStep").tasklet(step3Tasklet).listener(stepListener).build();
+		TaskletStep step = stepBuilderFactory.get("step3-taskletStep").tasklet(step3Tasklet).listener(stepListener).build();
+		return step;
+	}
+	
+	@Bean
+	public Step step4(StepBuilderFactory stepBuilderFactory) {
+		TaskletStep step = stepBuilderFactory.get("step4-taskletStep").tasklet(step4Tasklet).listener(stepListener).build();
 		return step;
 	}
 
